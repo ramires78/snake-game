@@ -1,31 +1,80 @@
-# Snake Game
+# Snake Game — Jenkins & Docker
 
-A simple browser-based Snake game built with HTML, CSS, and JavaScript.
+Простая браузерная игра «Змейка», используемая в качестве примера для демонстрации сборки Docker-образа и развёртывания приложения с помощью Jenkins.
 
-## Technologies
+## Задача
 
-- HTML, CSS, JavaScript
-- Docker & Nginx
-- Jenkins
-- GitHub
-- Docker Hub
+Настроить две задачи (Job) в Jenkins:
 
-## CI/CD Workflow
+1. **Сборка** — создать Docker-образ с указанной версией и загрузить его в Docker Hub.
+2. **Развёртывание** — скачать образ нужной версии из Docker Hub и запустить контейнер на другом сервере.
 
-1. **Build** — Jenkins gets the source code from GitHub, builds a Docker image, and pushes it to Docker Hub.
-2. **Deploy** — Jenkins pulls the image from Docker Hub and runs the container on a separate server.
+## Используемые технологии
 
-Both Jenkins jobs are started manually and support a `VERSION` parameter.
+- **GitHub** — хранение исходного кода игры.
+- **Docker** — создание образа и запуск контейнера.
+- **Docker Hub** — хранение готовых образов.
+- **Jenkins** — выполнение задач сборки и развёртывания.
+- **Nginx** — веб-сервер для запуска игры.
 
-## Run Locally
+## Как это работает
 
-```bash
-docker build -t snake:1 .
-docker run -d --name snake -p 8081:80 snake:1
+В Jenkins настроены две задачи на разных серверах.
+
+### 1. build-snake — сборка
+
+Выполняется на первом сервере.
+
+- Получает файлы игры из GitHub.
+- Собирает Docker-образ.
+- Присваивает образу указанную версию.
+- Отправляет образ в Docker Hub.
+
+### 2. deploy-snake — развёртывание
+
+Выполняется на втором сервере через Jenkins Agent.
+
+- Скачивает Docker-образ нужной версии.
+- Останавливает и удаляет предыдущий контейнер.
+- Запускает новый контейнер с игрой.
+
+Обе задачи запускаются **вручную**. Версия образа задаётся параметром `VERSION`, по умолчанию `1`.
+
+## Схема работы
+
+```text
+GitHub (исходники игры)
+          |
+          v
+Jenkins — первый сервер
+Сборка Docker-образа
+          |
+          v
+Docker Hub
+Хранение готового образа
+          |
+          v
+Jenkins — второй сервер
+Загрузка и запуск контейнера
+          |
+          v
+      Игра Snake
 ```
 
-Open http://localhost:8081 in your browser.
+## Структура проекта
 
-## Purpose
+```text
+snake-game/
+├── index.html        — игра
+├── Dockerfile        — инструкция для Docker
+├── README.md         — описание проекта
+└── jenkins/
+    ├── build.sh      — команды сборки
+    └── deploy.sh     — команды развёртывания
+```
 
-A simple educational DevOps project demonstrating Docker containerization and Jenkins-based build and deployment workflows.
+## Результат
+
+Настроены две работающие задачи Jenkins. Первая собирает и публикует Docker-образ, вторая скачивает его и запускает приложение на отдельном сервере.
+
+Сборка и развёртывание успешно проверены.
